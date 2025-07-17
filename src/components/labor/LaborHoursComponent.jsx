@@ -1,6 +1,5 @@
 import React, { useState, useMemo } from 'react';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
-import { DateRange } from 'react-day-picker';
 import LaborHoursHeader from './LaborHoursHeader';
 import LaborHoursChart from './LaborHoursChart';
 import LaborHoursViewDialog from './LaborHoursViewDialog';
