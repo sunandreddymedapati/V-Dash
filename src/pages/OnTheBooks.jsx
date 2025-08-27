@@ -199,7 +199,7 @@ const OnTheBooks = () => {
           setSelectedSegment={setSelectedSegment}
           segments={segments}
           onSegmentUpdate={handleSegmentUpdate}
-          showLabel={false}
+          showLabel={true}
           showAddButton={false}
         />
       </div>
