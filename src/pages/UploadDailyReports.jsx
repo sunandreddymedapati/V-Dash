@@ -1,10 +1,12 @@
 import React from 'react';
+import UploadReportsHeader from '../components/upload/UploadReportsHeader';
+import UploadReportsSection from '../components/upload/UploadReportsSection';
 
-const UploadDailyReports = () => {
+const UploadDailyReports = ({ selectedHotel }) => {
   return (
-    <div className="flex flex-col items-center justify-center min-h-[50vh]">
-      <h1 className="text-2xl font-bold text-gray-800 mb-2">Upload Daily Reports</h1>
-      <p className="text-gray-500 text-lg">Coming Soon</p>
+    <div className="space-y-6">
+      <UploadReportsHeader selectedHotel={selectedHotel} />
+      <UploadReportsSection />
     </div>
   );
 };

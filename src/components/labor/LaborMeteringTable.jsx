@@ -4,7 +4,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Settings, Download, Printer, Banknote } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DateRangePicker } from '@/components/ui/date-range-picker';
-import { startOfMonth } from 'date-fns';
 
 const LaborMeteringTable = ({
   selectedTab,
@@ -12,7 +11,7 @@ const LaborMeteringTable = ({
   laborMeteringData
 }) => {
   const [dateRange, setDateRange] = useState({
-    from: startOfMonth(new Date()),
+    from: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
     to: new Date()
   });
 

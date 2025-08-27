@@ -14,7 +14,7 @@ import OnTheBooks from "@/pages/OnTheBooks";
 import NotFound from "./pages/NotFound";
 import { cn } from "@/lib/utils";
 import Login from "@/pages/Login";
-import PROPERTIES from "@/constants/properties";
+import { fetchProperties } from "@/mocks/propertyApi";
 import HotelDashboard from "@/pages/HotelDashboard";
 import Budgeting from "@/pages/Budgeting";
 import Accounting from "@/pages/Accounting";
@@ -45,8 +45,16 @@ function AppRoutes() {
 
 function MainLayout() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [selectedHotel, setSelectedHotel] = useState(PROPERTIES[0]);
+  const [properties, setProperties] = useState([]);
+  const [selectedHotel, setSelectedHotel] = useState("");
   const manualToggle = useRef(false);
+
+  useEffect(() => {
+    fetchProperties().then((data) => {
+      setProperties(data);
+      if (data.length > 0) setSelectedHotel(data[0].name);
+    });
+  }, []);
 
   useEffect(() => {
     const updateSidebar = () => {
@@ -54,13 +62,10 @@ function MainLayout() {
         setSidebarCollapsed(isSmallScreen());
       }
     };
-
     updateSidebar();
-
     const handleResize = () => {
       updateSidebar();
     };
-
     window.addEventListener('resize', handleResize);
     return () => {
       window.removeEventListener('resize', handleResize);
@@ -83,6 +88,7 @@ function MainLayout() {
         onToggleSidebar={toggleSidebar}
         selectedHotel={selectedHotel}
         setSelectedHotel={setSelectedHotel}
+        properties={properties}
       />
 
       <main
@@ -95,14 +101,14 @@ function MainLayout() {
           <Routes>
             <Route path="/" element={<Login />} />
             <Route path="/login" element={<Login />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/hotel-dashboard" element={<HotelDashboard selectedHotel={selectedHotel} />} />
+            <Route path="/dashboard" element={<Dashboard properties={properties} />} />
+            <Route path="/hotel-dashboard" element={<HotelDashboard selectedHotel={selectedHotel} properties={properties} />} />
             <Route path="/night-audit" element={<NightAudit />} />
             <Route path="/reports" element={<Reports />} />
-            <Route path="/budgeting" element={<Budgeting selectedHotel={selectedHotel} />} />
+            <Route path="/budgeting" element={<Budgeting selectedHotel={selectedHotel} properties={properties} />} />
             <Route path="/accounting" element={<Accounting />} />
-            <Route path="/forecasting" element={<Forecasting selectedHotel={selectedHotel} />} />
-            <Route path="/labor-analytics" element={<LaborAnalytics selectedHotel={selectedHotel} />} />
+            <Route path="/forecasting" element={<Forecasting selectedHotel={selectedHotel} properties={properties} />} />
+            <Route path="/labor-analytics" element={<LaborAnalytics selectedHotel={selectedHotel} properties={properties} />} />
             <Route path="/on-the-books" element={<OnTheBooks />} />
             <Route path="/upload-daily-reports" element={<UploadDailyReports />} />
             <Route path="/view-download-reports" element={<ViewDownloadReports />} />
