@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import Sidebar from "@/components/Sidebar";
 import TopNavbar from "@/components/TopNavbar";
 import Footer from "@/components/Footer";
+import ProtectedRoute from "@/components/ProtectedRoute";
 import Dashboard from "@/pages/Dashboard";
 import NightAudit from "@/pages/NightAudit";
 import Reports from "@/pages/Reports";
@@ -33,14 +34,14 @@ function AppRoutes() {
   const location = useLocation();
 
   if (location.pathname === "/login" || location.pathname === "/") {
-    return (
-      <div>
-        <Login />
-      </div>
-    );
+    return <Login />;
   }
 
-  return <MainLayout />;
+  return (
+    <ProtectedRoute>
+      <MainLayout />
+    </ProtectedRoute>
+  );
 }
 
 function MainLayout() {
@@ -93,8 +94,6 @@ function MainLayout() {
       >
         <div className="p-6 w-full">
           <Routes>
-            <Route path="/" element={<Login />} />
-            <Route path="/login" element={<Login />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/hotel-dashboard" element={<HotelDashboard selectedHotel={selectedHotel} />} />
             <Route path="/night-audit" element={<NightAudit />} />

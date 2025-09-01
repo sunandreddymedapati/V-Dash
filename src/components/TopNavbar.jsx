@@ -4,6 +4,9 @@ import PageTitle, { usePageTitle } from './navbar/PageTitle';
 import HotelSelector from './navbar/HotelSelector';
 import NotificationBell from './navbar/NotificationBell';
 import UserMenu from './navbar/UserMenu';
+import { useAuthStore } from "@/store/authStore";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 
 const TopNavbar = ({
   sidebarCollapsed,
@@ -12,6 +15,13 @@ const TopNavbar = ({
   setSelectedHotel
 }) => {
   const pageTitle = usePageTitle();
+  const logout = useAuthStore(state => state.logout);
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
 
   return (
     <header
@@ -32,6 +42,9 @@ const TopNavbar = ({
           />
           <NotificationBell />
           <UserMenu />
+          <Button variant="outline" onClick={handleLogout}>
+            Logout
+          </Button>
         </div>
       </div>
     </header>
