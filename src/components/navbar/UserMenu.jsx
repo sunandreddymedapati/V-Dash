@@ -1,12 +1,18 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { User, ChevronDown } from 'lucide-react';
+import { useAuthStore } from "@/store/authStore";
 
 const UserMenu = () => {
   const navigate = useNavigate();
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef(null);
+  const logout = useAuthStore(state => state.logout);
 
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
   // Close dropdown on outside click
   useEffect(() => {
     if (!showDropdown) return;
@@ -93,8 +99,7 @@ const UserMenu = () => {
           <button
             className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
             onClick={() => {
-              setShowDropdown(false);
-              navigate('/');
+              handleLogout();
             }}
           >
             Logout

@@ -42,9 +42,6 @@ const TopNavbar = ({
           />
           <NotificationBell />
           <UserMenu />
-          <Button variant="outline" onClick={handleLogout}>
-            Logout
-          </Button>
         </div>
       </div>
     </header>
