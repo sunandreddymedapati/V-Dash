@@ -1,6 +1,7 @@
 import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Grid3X3 } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -35,7 +36,12 @@ const TopARCompaniesTable = () => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Top 5 A/R – {currentDate}</CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle>Top 5 A/R – August 2025</CardTitle>
+          <Button variant="outline" size="sm" className="p-2">
+            <Grid3X3 className="h-4 w-4" />
+          </Button>
+        </div>
       </CardHeader>
       <CardContent>
         <Table>
@@ -43,7 +49,7 @@ const TopARCompaniesTable = () => {
             <TableRow>
               <TableHead>Company Name</TableHead>
               <TableHead className="text-right">Total Outstanding</TableHead>
-              <TableHead className="text-center">Actions</TableHead>
+
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -53,11 +59,7 @@ const TopARCompaniesTable = () => {
                 <TableCell className="text-right font-mono">
                   {formatCurrency(company.totalOutstanding)}
                 </TableCell>
-                <TableCell className="text-center">
-                  <Button variant="outline" size="sm">
-                    View Details
-                  </Button>
-                </TableCell>
+
               </TableRow>
             ))}
           </TableBody>

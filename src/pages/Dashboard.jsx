@@ -3,6 +3,7 @@ import SegmentSelector from '@/components/SegmentSelector';
 import KPICardsSection from '@/components/KPICardsSection';
 import VarianceTable from '@/components/VarianceTable';
 import RevenueKPI from '@/components/RevenueKPI';
+import BusinessPerformanceSummary from '@/components/portfolio/BusinessPerformanceSummary';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
@@ -94,6 +95,9 @@ const Dashboard = () => {
         selectedSegment={selectedSegment}
         segments={segments}
       />
+
+      {/* Business Performance Summary */}
+      <BusinessPerformanceSummary />
 
       {/* Variance Table Section */}
       <VarianceTable />
