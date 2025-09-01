@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import Sidebar from "@/components/Sidebar";
 import TopNavbar from "@/components/TopNavbar";
 import Footer from "@/components/Footer";
+import ProtectedRoute from "@/components/ProtectedRoute";
 import Dashboard from "@/pages/Dashboard";
 import NightAudit from "@/pages/NightAudit";
 import Reports from "@/pages/Reports";
@@ -22,6 +23,7 @@ import Forecasting from "@/pages/Forecasting";
 import LaborAnalytics from "@/pages/LaborAnalytics";
 import UploadDailyReports from "@/pages/UploadDailyReports";
 import ViewDownloadReports from "@/pages/ViewDownloadReports";
+import { usePropertyStore } from "@/store/propertyStore";
 
 const queryClient = new QueryClient();
 
@@ -33,28 +35,33 @@ function AppRoutes() {
   const location = useLocation();
 
   if (location.pathname === "/login" || location.pathname === "/") {
-    return (
-      <div>
-        <Login />
-      </div>
-    );
+    return <Login />;
   }
 
-  return <MainLayout />;
+  return (
+    <ProtectedRoute>
+      <MainLayout />
+    </ProtectedRoute>
+  );
 }
 
 function MainLayout() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [properties, setProperties] = useState([]);
-  const [selectedHotel, setSelectedHotel] = useState("");
   const manualToggle = useRef(false);
 
+  const {
+    properties,
+    selectedHotel,
+    setSelectedHotel,
+    fetchProperties,
+    initialized,
+  } = usePropertyStore();
+
   useEffect(() => {
-    fetchProperties().then((data) => {
-      setProperties(data);
-      if (data.length > 0) setSelectedHotel(data[0].name);
-    });
-  }, []);
+    if (!initialized) {
+      fetchProperties();
+    }
+  }, [initialized, fetchProperties]);
 
   useEffect(() => {
     const updateSidebar = () => {
@@ -86,9 +93,6 @@ function MainLayout() {
       <TopNavbar
         sidebarCollapsed={sidebarCollapsed}
         onToggleSidebar={toggleSidebar}
-        selectedHotel={selectedHotel}
-        setSelectedHotel={setSelectedHotel}
-        properties={properties}
       />
 
       <main
@@ -99,16 +103,14 @@ function MainLayout() {
       >
         <div className="p-6 w-full">
           <Routes>
-            <Route path="/" element={<Login />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/dashboard" element={<Dashboard properties={properties} />} />
-            <Route path="/hotel-dashboard" element={<HotelDashboard selectedHotel={selectedHotel} properties={properties} />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/hotel-dashboard" element={<HotelDashboard selectedHotel={selectedHotel} />} />
             <Route path="/night-audit" element={<NightAudit />} />
             <Route path="/reports" element={<Reports />} />
-            <Route path="/budgeting" element={<Budgeting selectedHotel={selectedHotel} properties={properties} />} />
+            <Route path="/budgeting" element={<Budgeting selectedHotel={selectedHotel} />} />
             <Route path="/accounting" element={<Accounting />} />
-            <Route path="/forecasting" element={<Forecasting selectedHotel={selectedHotel} properties={properties} />} />
-            <Route path="/labor-analytics" element={<LaborAnalytics selectedHotel={selectedHotel} properties={properties} />} />
+            <Route path="/forecasting" element={<Forecasting selectedHotel={selectedHotel} />} />
+            <Route path="/labor-analytics" element={<LaborAnalytics selectedHotel={selectedHotel} />} />
             <Route path="/on-the-books" element={<OnTheBooks />} />
             <Route path="/upload-daily-reports" element={<UploadDailyReports />} />
             <Route path="/view-download-reports" element={<ViewDownloadReports />} />
