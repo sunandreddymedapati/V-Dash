@@ -8,7 +8,9 @@ const SegmentSelector = ({
   selectedSegment,
   setSelectedSegment,
   segments,
-  onSegmentUpdate
+  onSegmentUpdate,
+  showLabel = true,
+  showAddButton = true
 }) => {
   const [dialogOpen, setDialogOpen] = useState(false);
 
@@ -35,7 +37,7 @@ const SegmentSelector = ({
   return (
     <>
       <div className="flex items-center space-x-4">
-        <label className="text-sm font-medium text-gray-700">Segment:</label>
+        {showLabel && <label className="text-sm font-medium text-gray-700">Segment:</label>}
         <div className="flex items-center space-x-2">
           <Select value={selectedSegment} onValueChange={setSelectedSegment}>
             <SelectTrigger className="w-[280px]">
@@ -49,23 +51,27 @@ const SegmentSelector = ({
               ))}
             </SelectContent>
           </Select>
-          <Button
-            variant="outline"
-            size="icon"
-            className="h-10 w-10 flex-shrink-0"
-            onClick={() => setDialogOpen(true)}
-          >
-            <Plus className="h-4 w-4" />
-          </Button>
+          {showAddButton && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-10 w-10 p-0 flex-shrink-0"
+              onClick={() => setDialogOpen(true)}
+            >
+              <Plus className="h-4 w-4" />
+            </Button>
+          )}
         </div>
       </div>
 
-      <SegmentDialog
-        open={dialogOpen}
-        onOpenChange={setDialogOpen}
-        segments={segments}
-        onSave={handleSegmentSave}
-      />
+      {showAddButton && (
+        <SegmentDialog
+          open={dialogOpen}
+          onOpenChange={setDialogOpen}
+          segments={segments}
+          onSave={handleSegmentSave}
+        />
+      )}
     </>
   );
 };
