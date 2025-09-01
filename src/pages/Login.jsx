@@ -40,8 +40,8 @@ const Login = () => {
       }, { auth: false }); // No auth required for login
 
       // Store token and user data
-      const token = response.token || response.access_token;
-      const userData = response.user || { email };
+      const token = response.data?.access_token;
+      const userData = response.data?.user;
       
       login(token, userData);
       navigate("/dashboard");

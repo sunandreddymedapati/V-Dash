@@ -7,16 +7,16 @@ import UserMenu from './navbar/UserMenu';
 import { useAuthStore } from "@/store/authStore";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { usePropertyStore } from "@/store/propertyStore";
 
 const TopNavbar = ({
   sidebarCollapsed,
   onToggleSidebar,
-  selectedHotel,
-  setSelectedHotel
 }) => {
   const pageTitle = usePageTitle();
   const logout = useAuthStore(state => state.logout);
   const navigate = useNavigate();
+  const { selectedHotel, setSelectedHotel } = usePropertyStore();
 
   const handleLogout = () => {
     logout();
