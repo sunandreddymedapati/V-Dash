@@ -87,9 +87,8 @@ function MainLayout() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 w-full flex-col">
+    <div className="min-h-screen bg-gray-50 w-full flex flex-col">
       <Sidebar isCollapsed={sidebarCollapsed} onToggleCollapse={toggleSidebar} />
-
       <TopNavbar
         sidebarCollapsed={sidebarCollapsed}
         onToggleSidebar={toggleSidebar}
@@ -121,7 +120,7 @@ function MainLayout() {
 
       <div
         className={cn(
-          "transition-all duration-300",
+          "transition-all duration-300 mt-auto",
           sidebarCollapsed ? "ml-16" : "ml-64"
         )}
       >

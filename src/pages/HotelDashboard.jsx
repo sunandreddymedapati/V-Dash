@@ -76,7 +76,7 @@ const HotelDashboard = ({ selectedHotel }) => {
           setKpiVarianceTab={setKpiVarianceTab}
           selectedDate={date}
         />
-        <Next30Days />
+        {/* <Next30Days /> */}
         <RevenueComparison />
       </div>
     </div>
