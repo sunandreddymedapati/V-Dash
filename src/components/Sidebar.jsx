@@ -21,16 +21,16 @@ import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/comp
 const navigationItems = [
   { label: 'Portfolio Dashboard', icon: BarChart3, path: '/dashboard' },
   { label: 'Hotel Dashboard', icon: Building2, path: '/hotel-dashboard' },
-  { label: 'Budgeting', icon: DollarSign, path: '/budgeting' },
-  { label: 'Forecasting', icon: TrendingUp, path: '/forecasting' },
-  { label: 'Labor Analytics', icon: Users, path: '/labor-analytics' },
-  { label: 'On The Books', icon: BookOpen, path: '/on-the-books' },
-  { label: 'Accounting', icon: Calculator, path: '/accounting' },
+  // { label: 'Budgeting', icon: DollarSign, path: '/budgeting' },
+  // { label: 'Forecasting', icon: TrendingUp, path: '/forecasting' },
+  // { label: 'Labor Analytics', icon: Users, path: '/labor-analytics' },
+  // { label: 'On The Books', icon: BookOpen, path: '/on-the-books' },
+  // { label: 'Accounting', icon: Calculator, path: '/accounting' },
 ];
 
 const additionalItems = [
-  { label: 'Upload Daily Reports', icon: Upload, path: '/upload-daily-reports' },
-  { label: 'View/Download Reports', icon: Download, path: '/view-download-reports' },
+  // { label: 'Upload Daily Reports', icon: Upload, path: '/upload-daily-reports' },
+  // { label: 'View/Download Reports', icon: Download, path: '/view-download-reports' },
 ];
 
 const Sidebar = ({ isCollapsed, onToggleCollapse }) => {

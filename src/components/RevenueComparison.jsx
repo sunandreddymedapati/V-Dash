@@ -82,7 +82,7 @@ function RevenueComparison() {
   }, []);
 
   return (
-    <Card className="rounded-xl shadow-sm dark:bg-gray-800 dark:border-gray-700">
+    <Card className="rounded-xl shadow-sm dark:bg-gray-800 dark:border-gray-700 mt-6">
       <CardHeader>
         <CardTitle className="dark:text-white">Revenue Comparison</CardTitle>
       </CardHeader>

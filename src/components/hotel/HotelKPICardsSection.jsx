@@ -87,19 +87,23 @@ function HotelKPICardsSection({
           The data is not available. Data is only available between Jan 1st 2024 till Aug 31st 2025
         </div>
       ) : (
-        <HotelTimeTabsSection
-          kpiTimeTab={kpiTimeTab}
-          setKpiTimeTab={setKpiTimeTab}
-          getCurrentKPIData={getKPIData}
-          varianceSuffix={varianceSuffix}
-        />
+        <>
+          <HotelTimeTabsSection
+            kpiTimeTab={kpiTimeTab}
+            setKpiTimeTab={setKpiTimeTab}
+            getCurrentKPIData={getKPIData}
+            varianceSuffix={varianceSuffix}
+          />
+          <HotelVarianceTabsSection
+            kpiVarianceTab={kpiVarianceTab}
+            setKpiVarianceTab={setKpiVarianceTab}
+          />
+        </>
+
       )}
 
       {/* Bottom tabs for variance */}
-      <HotelVarianceTabsSection
-        kpiVarianceTab={kpiVarianceTab}
-        setKpiVarianceTab={setKpiVarianceTab}
-      />
+
     </div>
   );
 };

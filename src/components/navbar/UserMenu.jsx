@@ -2,12 +2,14 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { User, ChevronDown } from 'lucide-react';
 import { useAuthStore } from "@/store/authStore";
+import "react-day-picker/dist/style.css"; 
 
 const UserMenu = () => {
   const navigate = useNavigate();
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef(null);
   const logout = useAuthStore(state => state.logout);
+  const user = useAuthStore(state => state.user);
 
   const handleLogout = () => {
     logout();
@@ -43,12 +45,16 @@ const UserMenu = () => {
         <div className="absolute top-full right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
           {/* User Name and Designation */}
           <div className="px-4 py-3 border-b border-gray-100">
-            <p className="text-sm font-medium text-gray-900">Jason D'Agostino</p>
-            <p className="text-xs text-gray-500">Corporate Director</p>
+            <p className="text-sm font-medium text-gray-900">{user.full_name}</p>
+            {user?.email && (
+              <p className="text-xs text-gray-500 truncate">{user.email}</p>
+            )}
+          {/* </div> */}
+          {/* <p className="text-xs text-gray-500">Corporate Director</p> */}
           </div>
 
           {/* Section 1 */}
-          <button
+          {/* <button
             className="w-full flex items-center gap-2 text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
             onClick={() => setShowDropdown(false)}
           >
@@ -59,12 +65,12 @@ const UserMenu = () => {
             onClick={() => setShowDropdown(false)}
           >
             Email List
-          </button>
+          </button> */}
 
-          <hr className="my-1 border-gray-100" />
+          {/* <hr className="my-1 border-gray-100" /> */}
 
           {/* Section 2 */}
-          <button
+          {/* <button
             className="w-full flex items-center gap-2 text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
             onClick={() => setShowDropdown(false)}
           >
@@ -83,15 +89,15 @@ const UserMenu = () => {
             Bank Accounts
           </button>
 
-          <hr className="my-1 border-gray-100" />
+          <hr className="my-1 border-gray-100" /> */}
 
           {/* Section 3 */}
-          <button
+          {/* <button
             className="w-full flex items-center gap-2 text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
             onClick={() => setShowDropdown(false)}
           >
             Change Password
-          </button>
+          </button> */}
 
           <hr className="my-1 border-gray-100" />
 

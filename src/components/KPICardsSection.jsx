@@ -60,7 +60,7 @@ const KPICardsSection = ({
   const isEmpty = kpiData && Object.keys(kpiData).length === 0;
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
       <PortfolioSummaryHeader
         selectedDate={selectedDate}
         selectedSegment={selectedSegment}

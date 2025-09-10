@@ -40,7 +40,7 @@ const TopNavbar = ({
             selectedHotel={selectedHotel}
             setSelectedHotel={setSelectedHotel}
           />
-          <NotificationBell />
+          {/* <NotificationBell /> */}
           <UserMenu />
         </div>
       </div>
