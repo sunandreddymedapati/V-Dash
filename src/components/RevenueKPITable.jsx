@@ -1,12 +1,26 @@
 import React from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { getPropertyWithRooms } from '@/constants/properties';
+import { usePropertyStore } from '@/store/propertyStore';
 
 const RevenueKPITable = ({
   properties,
   columns,
   generateData
 }) => {
+  const storeProperties = usePropertyStore((s) => s.properties);
+
+  const formatProperty = React.useCallback(
+    (propertyName) => {
+      const match = Array.isArray(storeProperties)
+        ? storeProperties.find(p => p?.name === propertyName)
+        : undefined;
+      return match && typeof match.rooms === 'number'
+        ? `${match.name} (${match.rooms})`
+        : propertyName;
+    },
+    [storeProperties]
+  );
+
   return (
     <div className="w-full overflow-x-auto">
       <div className="min-w-full">
@@ -28,7 +42,7 @@ const RevenueKPITable = ({
               {properties.map((property, index) => (
                 <TableRow key={index}>
                   <TableCell className="sticky left-0 bg-white z-10 font-medium border-r">
-                    {getPropertyWithRooms(property)}
+                    {formatProperty(property)}
                   </TableCell>
                   {columns.map((column) => (
                     <TableCell key={column.key} className="text-center">

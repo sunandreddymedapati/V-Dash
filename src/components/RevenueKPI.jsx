@@ -7,7 +7,7 @@ import RevenueKPITable from './RevenueKPITable';
 import MonthYearPicker from './MonthYearPicker';
 import RevenueKPIControls from './RevenueKPIControls';
 import RevenueKPILineChart from './RevenueKPILineChart';
-import PROPERTIES from '../constants/properties';
+
 import {
   generateColumns,
   generateData,
@@ -39,18 +39,16 @@ const RevenueKPI = () => {
   }, [selectedTimeframe]);
 
   const kpiOptions = [
-    { value: 'total-revenue', label: 'Total Revenue' },
+    { value: 'total_revenue', label: 'Total Revenue' },
     { value: 'revpar', label: 'RevPAR' },
     { value: 'adr', label: 'ADR' },
-    { value: 'city-ledger', label: 'City Ledger (Direct Bills Receivables)' },
-    { value: 'guest-ledger', label: 'Guest Ledger' },
-    { value: 'advance-deposits', label: 'Advance Deposits' },
+    { value: 'city_ledger', label: 'City Ledger (Direct Bills Receivables)' },
+    { value: 'guest_ledger', label: 'Guest Ledger' },
     { value: 'occupancy', label: 'Occupancy (%)' },
-    { value: 'occupancy-forecast', label: 'Occupancy Forecast' },
     { value: 'cash', label: 'Cash' },
-    { value: 'bank-cards', label: 'Bank Cards' },
-    { value: 'room-revenue', label: 'Room Revenue' },
-    { value: 'other-revenue', label: 'Other Revenue' },
+    { value: 'bank_cards', label: 'Bank Cards' },
+    { value: 'room_revenue', label: 'Room Revenue' },
+    { value: 'other_revenue', label: 'Other Revenue' },
     { value: 'tax', label: 'Tax' },
   ];
 
