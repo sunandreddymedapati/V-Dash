@@ -99,7 +99,7 @@ const Dashboard = () => {
         segments={segments}
       />
 
-      <BusinessPerformanceSummary />
+      {/* <BusinessPerformanceSummary /> */}
       <VarianceTable />
       <RevenueKPI />
     </div>

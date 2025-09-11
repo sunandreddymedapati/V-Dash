@@ -7,16 +7,16 @@ import RevenueKPITable from './RevenueKPITable';
 import MonthYearPicker from './MonthYearPicker';
 import RevenueKPIControls from './RevenueKPIControls';
 import RevenueKPILineChart from './RevenueKPILineChart';
-
 import {
   generateColumns,
   generateData,
   handleDownload,
   handlePrint
 } from './revenueKPIUtils';
+import { api } from '@/store/api';
 
 const RevenueKPI = () => {
-  const [selectedKPI, setSelectedKPI] = useState('total-revenue');
+  const [selectedKPI, setSelectedKPI] = useState('total_revenue');
   const [selectedTimeframe, setSelectedTimeframe] = useState('last-15-days');
   const [chartMode, setChartMode] = useState('table');
   const today = new Date();
@@ -24,6 +24,11 @@ const RevenueKPI = () => {
     month: today.getMonth(),
     year: today.getFullYear(),
   });
+
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [apiColumns, setApiColumns] = useState(null);
+  const [apiDetails, setApiDetails] = useState(null);
 
   const outputRef = useRef(null);
   const monthYearRequired = ['mtd', 'ytd', 'trailing-12', 'last-3-years'].includes(selectedTimeframe);
@@ -37,6 +42,41 @@ const RevenueKPI = () => {
     }
     // eslint-disable-next-line
   }, [selectedTimeframe]);
+
+  useEffect(() => {
+    (async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const params = {
+          timeframe: selectedTimeframe,
+          unit: 'USD',
+          decimals: 2,
+        };
+
+        // Include month/year for all timeframes except 'last-15-days'
+        if (selectedTimeframe !== 'last-15-days') {
+          params.month = monthYear.month + 1; // 1-based month
+          params.year = monthYear.year;
+        }
+
+        // IMPORTANT: pass params as a named option
+        const res = await api.get('reports/grid', { params });
+        const { columns: cols, details } = res || {};
+        setApiColumns(Array.isArray(cols) ? cols : null);
+        setApiDetails(Array.isArray(details) ? details : null);
+      } catch (e) {
+        if (e.name !== 'AbortError') {
+          setError(e.message || 'Failed to fetch KPI data');
+        }
+        setApiColumns(null);
+        setApiDetails(null);
+      } finally {
+        setLoading(false);
+      }
+    })();
+    // no AbortController since apiFetch doesn't support signal
+  }, [selectedTimeframe, monthYear]);
 
   const kpiOptions = [
     { value: 'total_revenue', label: 'Total Revenue' },
@@ -61,8 +101,9 @@ const RevenueKPI = () => {
   ];
 
   const columns = generateColumns({ selectedTimeframe, monthYear, today });
+  const effectiveColumns = apiColumns || columns;
 
-  const onDownload = () => handleDownload(columns, selectedKPI, selectedTimeframe, monthYear);
+  const onDownload = () => handleDownload(effectiveColumns, selectedKPI, selectedTimeframe, monthYear);
   const onPrint = () => handlePrint(outputRef);
 
   const handleToggleChart = () => {
@@ -108,25 +149,35 @@ const RevenueKPI = () => {
       <CardContent>
         <div ref={outputRef}>
           <PropertyList>
-            {(properties) => {
+            {(storeProperties) => {
+              const properties = apiDetails ? apiDetails.map(d => d.property_name) : storeProperties;
+              const valueMap = apiDetails
+                ? apiDetails.reduce((acc, d) => {
+                    acc[d.property_name] = d.values || {};
+                    return acc;
+                  }, {})
+                : null;
+
               if (chartMode === 'table') {
                 return (
                   <RevenueKPITable
                     properties={properties}
-                    columns={columns}
-                    generateData={(property, colKey) =>
-                      generateData(selectedKPI, property, colKey)
-                    }
+                    columns={effectiveColumns}
+                    generateData={(property, colKey) => {
+                      const v = valueMap?.[property]?.[selectedKPI]?.[colKey];
+                      return v ?? generateData(selectedKPI, property, colKey);
+                    }}
                   />
                 );
               } else {
                 return (
                   <RevenueKPILineChart
                     properties={properties}
-                    columns={columns}
-                    generateData={(property, colKey) =>
-                      generateData(selectedKPI, property, colKey)
-                    }
+                    columns={effectiveColumns}
+                    generateData={(property, colKey) => {
+                      const v = valueMap?.[property]?.[selectedKPI]?.[colKey];
+                      return v ?? generateData(selectedKPI, property, colKey);
+                    }}
                     selectedKPI={selectedKPI}
                   />
                 );
