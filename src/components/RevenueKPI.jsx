@@ -1,3 +1,4 @@
+// In component: RevenueKPI
 import React, { useRef, useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -14,6 +15,7 @@ import {
   handlePrint
 } from './revenueKPIUtils';
 import { api } from '@/store/api';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const RevenueKPI = () => {
   const [selectedKPI, setSelectedKPI] = useState('total_revenue');
@@ -147,44 +149,85 @@ const RevenueKPI = () => {
         </div>
       </CardHeader>
       <CardContent>
-        <div ref={outputRef}>
-          <PropertyList>
-            {(storeProperties) => {
-              const properties = apiDetails ? apiDetails.map(d => d.property_name) : storeProperties;
-              const valueMap = apiDetails
-                ? apiDetails.reduce((acc, d) => {
-                    acc[d.property_name] = d.values || {};
-                    return acc;
-                  }, {})
-                : null;
+        {loading ? (
+          chartMode === 'table' ? (
+            <div className="space-y-3">
+              {/* Table header skeleton */}
+              <div className="flex gap-2 items-center">
+                <Skeleton className="h-6 w-48" />
+                <div className="flex-1 overflow-x-auto">
+                  <div className="flex gap-2 min-w-[600px]">
+                    {effectiveColumns.map((c) => (
+                      <Skeleton key={c.key} className="h-6 w-24" />
+                    ))}
+                    {/* Total col */}
+                    <Skeleton className="h-6 w-28" />
+                  </div>
+                </div>
+              </div>
+              {/* Table body skeleton rows */}
+              {[...Array(8)].map((_, i) => (
+                <div key={i} className="flex gap-2 items-center">
+                  <Skeleton className="h-6 w-48" />
+                  <div className="flex-1 overflow-x-auto">
+                    <div className="flex gap-2 min-w-[600px]">
+                      {effectiveColumns.map((c) => (
+                        <Skeleton key={c.key} className="h-6 w-24" />
+                      ))}
+                      <Skeleton className="h-6 w-28" />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="w-full py-2 pr-2 pl-1" style={{ minHeight: 400 }}>
+              <Skeleton className="w-full h-[420px] rounded-md" />
+              <div className="mt-3 text-xs text-gray-400 text-center">
+                <Skeleton className="h-4 w-64 mx-auto" />
+              </div>
+            </div>
+          )
+        ) : (
+          <div ref={outputRef}>
+            <PropertyList>
+              {(storeProperties) => {
+                const properties = apiDetails ? apiDetails.map(d => d.property_name) : storeProperties;
+                const valueMap = apiDetails
+                  ? apiDetails.reduce((acc, d) => {
+                      acc[d.property_name] = d.values || {};
+                      return acc;
+                    }, {})
+                  : null;
 
-              if (chartMode === 'table') {
-                return (
-                  <RevenueKPITable
-                    properties={properties}
-                    columns={effectiveColumns}
-                    generateData={(property, colKey) => {
-                      const v = valueMap?.[property]?.[selectedKPI]?.[colKey];
-                      return v ?? generateData(selectedKPI, property, colKey);
-                    }}
-                  />
-                );
-              } else {
-                return (
-                  <RevenueKPILineChart
-                    properties={properties}
-                    columns={effectiveColumns}
-                    generateData={(property, colKey) => {
-                      const v = valueMap?.[property]?.[selectedKPI]?.[colKey];
-                      return v ?? generateData(selectedKPI, property, colKey);
-                    }}
-                    selectedKPI={selectedKPI}
-                  />
-                );
-              }
-            }}
-          </PropertyList>
-        </div>
+                if (chartMode === 'table') {
+                  return (
+                    <RevenueKPITable
+                      properties={properties}
+                      columns={effectiveColumns}
+                      generateData={(property, colKey) => {
+                        const v = valueMap?.[property]?.[selectedKPI]?.[colKey];
+                        return v ?? generateData(selectedKPI, property, colKey);
+                      }}
+                    />
+                  );
+                } else {
+                  return (
+                    <RevenueKPILineChart
+                      properties={properties}
+                      columns={effectiveColumns}
+                      generateData={(property, colKey) => {
+                        const v = valueMap?.[property]?.[selectedKPI]?.[colKey];
+                        return v ?? generateData(selectedKPI, property, colKey);
+                      }}
+                      selectedKPI={selectedKPI}
+                    />
+                  );
+                }
+              }}
+            </PropertyList>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
