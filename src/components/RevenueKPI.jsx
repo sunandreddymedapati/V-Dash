@@ -55,14 +55,10 @@ const RevenueKPI = () => {
           unit: 'USD',
           decimals: 2,
         };
-
-        // Include month/year for all timeframes except 'last-15-days'
         if (selectedTimeframe !== 'last-15-days') {
-          params.month = monthYear.month + 1; // 1-based month
+          params.month = monthYear.month + 1;
           params.year = monthYear.year;
         }
-
-        // IMPORTANT: pass params as a named option
         const res = await api.get('reports/grid', { params });
         const { columns: cols, details } = res || {};
         setApiColumns(Array.isArray(cols) ? cols : null);
@@ -77,8 +73,17 @@ const RevenueKPI = () => {
         setLoading(false);
       }
     })();
-    // no AbortController since apiFetch doesn't support signal
   }, [selectedTimeframe, monthYear]);
+
+  // Determine if there is any non-null/defined value for the selected KPI
+  const hasApiDataForKPI = React.useMemo(() => {
+    if (!apiDetails) return false;
+    return apiDetails.some(d => {
+      const series = d?.values?.[selectedKPI];
+      if (!series) return false;
+      return Object.values(series).some(v => v !== null && v !== undefined && v !== '');
+    });
+  }, [apiDetails, selectedKPI]);
 
   const kpiOptions = [
     { value: 'total_revenue', label: 'Total Revenue' },
@@ -99,7 +104,7 @@ const RevenueKPI = () => {
     { value: 'mtd', label: 'MTD' },
     { value: 'ytd', label: 'YTD' },
     { value: 'trailing-12', label: 'Trailing 12' },
-    { value: 'last-3-years', label: 'Last 3 Years' },
+    // { value: 'last-3-years', label: 'Last 3 Years' },
   ];
 
   const columns = generateColumns({ selectedTimeframe, monthYear, today });
@@ -118,17 +123,17 @@ const RevenueKPI = () => {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <CardTitle>Revenue KPIs</CardTitle>
           <div className="flex items-center space-x-2">
-            <Button variant="outline" size="sm" onClick={onDownload}>
+            <Button variant="outline" size="sm" onClick={onDownload} disabled={loading || !hasApiDataForKPI}>
               <Download className="w-4 h-4" />
             </Button>
-            <Button variant="outline" size="sm" onClick={handleToggleChart}>
+            <Button variant="outline" size="sm" onClick={handleToggleChart} disabled={loading}>
               {chartMode === 'table' ? (
                 <BarChart3 className="w-4 h-4" />
               ) : (
                 <Table className="w-4 h-4" />
               )}
             </Button>
-            <Button variant="outline" size="sm" onClick={onPrint}>
+            <Button variant="outline" size="sm" onClick={onPrint} disabled={loading}>
               <Printer className="w-4 h-4" />
             </Button>
           </div>
@@ -150,9 +155,9 @@ const RevenueKPI = () => {
       </CardHeader>
       <CardContent>
         {loading ? (
+          // Skeletons during load
           chartMode === 'table' ? (
             <div className="space-y-3">
-              {/* Table header skeleton */}
               <div className="flex gap-2 items-center">
                 <Skeleton className="h-6 w-48" />
                 <div className="flex-1 overflow-x-auto">
@@ -160,12 +165,10 @@ const RevenueKPI = () => {
                     {effectiveColumns.map((c) => (
                       <Skeleton key={c.key} className="h-6 w-24" />
                     ))}
-                    {/* Total col */}
                     <Skeleton className="h-6 w-28" />
                   </div>
                 </div>
               </div>
-              {/* Table body skeleton rows */}
               {[...Array(8)].map((_, i) => (
                 <div key={i} className="flex gap-2 items-center">
                   <Skeleton className="h-6 w-48" />
@@ -188,11 +191,18 @@ const RevenueKPI = () => {
               </div>
             </div>
           )
+        ) : !hasApiDataForKPI ? (
+          // Empty state when API returned no data (no fallback randoms)
+          <div className="p-10 text-center text-sm text-muted-foreground">
+            No data available for the selected KPI and timeframe.
+          </div>
         ) : (
           <div ref={outputRef}>
             <PropertyList>
               {(storeProperties) => {
                 const properties = apiDetails ? apiDetails.map(d => d.property_name) : storeProperties;
+
+                // Build lookup only from API; do not fallback to generated values
                 const valueMap = apiDetails
                   ? apiDetails.reduce((acc, d) => {
                       acc[d.property_name] = d.values || {};
@@ -207,7 +217,7 @@ const RevenueKPI = () => {
                       columns={effectiveColumns}
                       generateData={(property, colKey) => {
                         const v = valueMap?.[property]?.[selectedKPI]?.[colKey];
-                        return v ?? generateData(selectedKPI, property, colKey);
+                        return v ?? ''; // show blank instead of random default
                       }}
                     />
                   );
@@ -218,7 +228,7 @@ const RevenueKPI = () => {
                       columns={effectiveColumns}
                       generateData={(property, colKey) => {
                         const v = valueMap?.[property]?.[selectedKPI]?.[colKey];
-                        return v ?? generateData(selectedKPI, property, colKey);
+                        return v ?? null; // charts will be empty if no values
                       }}
                       selectedKPI={selectedKPI}
                     />
