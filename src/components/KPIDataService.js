@@ -1,3 +1,5 @@
+import { api } from "@/store/api";
+
 // Sample data for different time periods and variance types
 export const kpiDataSets = {
   daily: {
@@ -98,6 +100,16 @@ export const kpiDataSets = {
   }
 };
 
-export const getCurrentKPIData = (kpiTimeTab, kpiVarianceTab) => {
-  return kpiDataSets[kpiTimeTab][kpiVarianceTab];
+export const getCurrentKPIData = async (selectedDate, kpiTimeTab, kpiVarianceTab) => {
+  const YYYY_MM_DD = selectedDate.toLocaleDateString('en-CA');
+
+  const currData = (await api.get('reports/revenue-kpi?date=' + YYYY_MM_DD, {auth : true})).data;
+  return currData[kpiTimeTab][kpiVarianceTab];
+};
+
+export const getCurrentKPIHotelData = async (selectedDate, kpiTimeTab, kpiVarianceTab) => {
+  const YYYY_MM_DD = selectedDate.toLocaleDateString('en-CA');
+
+  const currData = (await api.get('reports/revenue-kpi?date=' + YYYY_MM_DD, {auth : true})).data;
+  return currData[kpiTimeTab][kpiVarianceTab];
 };

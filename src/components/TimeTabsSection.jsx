@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import KPIGrid from '@/components/KPIGrid';
+import { use } from 'react';
 
 const TimeTabsSection = ({
   kpiTimeTab,
@@ -8,6 +9,27 @@ const TimeTabsSection = ({
   getCurrentKPIData,
   varianceSuffix = "LYV"
 }) => {
+  const [currData, setCurrData] = React.useState([]);
+
+  useEffect(() => {
+  let cancelled = false;
+
+  const run = async () => {
+    try {
+      const data = await getCurrentKPIData();
+      if (!cancelled) setCurrData(data);
+    } catch (err) {
+      // TODO: alert error
+    }
+  };
+
+  run();
+
+  return () => {
+    cancelled = true;
+  };
+}, [kpiTimeTab, getCurrentKPIData]);
+
   return (
     <Tabs value={kpiTimeTab} onValueChange={setKpiTimeTab} className="mb-6">
       <TabsList className="grid w-full grid-cols-3">
@@ -17,15 +39,15 @@ const TimeTabsSection = ({
       </TabsList>
       
       <TabsContent value="daily" className="mt-6">
-        <KPIGrid kpiData={getCurrentKPIData()} varianceSuffix={varianceSuffix} />
+        <KPIGrid kpiData={currData} varianceSuffix={varianceSuffix} />
       </TabsContent>
       
       <TabsContent value="mtd" className="mt-6">
-        <KPIGrid kpiData={getCurrentKPIData()} varianceSuffix={varianceSuffix} />
+        <KPIGrid kpiData={currData} varianceSuffix={varianceSuffix} />
       </TabsContent>
       
       <TabsContent value="ytd" className="mt-6">
-        <KPIGrid kpiData={getCurrentKPIData()} varianceSuffix={varianceSuffix} />
+        <KPIGrid kpiData={currData} varianceSuffix={varianceSuffix} />
       </TabsContent>
     </Tabs>
   );

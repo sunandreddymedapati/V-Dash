@@ -22,8 +22,8 @@ const KPICardsSection = ({
   segments
 }) => {
   // Get current KPI data based on selected tabs
-  const getKPIData = () => {
-    return getCurrentKPIData(kpiTimeTab, kpiVarianceTab);
+  const getKPIData = async () => {
+    return await getCurrentKPIData(selectedDate, kpiTimeTab, kpiVarianceTab);
   };
 
   const varianceSuffix = getVarianceSuffix(kpiVarianceTab);

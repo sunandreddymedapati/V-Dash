@@ -1,7 +1,7 @@
 import React from 'react';
 import HotelTimeTabsSection from './HotelTimeTabsSection';
 import HotelVarianceTabsSection from './HotelVarianceTabsSection';
-import { getCurrentKPIData } from '@/components/KPIDataService';
+import { getCurrentKPIHotelData } from '@/components/KPIDataService';
 
 const getVarianceSuffix = (kpiVarianceTab) => {
   if (kpiVarianceTab === "last-year") return "LYV";
@@ -19,7 +19,8 @@ const HotelKPICardsSection = ({
   selectedDate,
 }) => {
   // Get data based on selected tabs (from the data service)
-  const getKPIData = () => getCurrentKPIData(kpiTimeTab, kpiVarianceTab);
+  const getKPIData = async () => await getCurrentKPIHotelData
+  (selectedDate, kpiTimeTab, kpiVarianceTab);
 
   // Determine the suffix for the variance label
   const varianceSuffix = getVarianceSuffix(kpiVarianceTab);
