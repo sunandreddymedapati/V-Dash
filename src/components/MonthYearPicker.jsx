@@ -9,7 +9,7 @@ const months = [
   "July", "August", "September", "October", "November", "December"
 ];
 
-const MonthYearPicker = ({ value, onChange, disabledFuture }) => {
+function MonthYearPicker({ value, onChange, disabledFuture }) {
   const today = new Date();
   const currentYear = today.getFullYear();
   const currentMonth = today.getMonth();
@@ -29,8 +29,8 @@ const MonthYearPicker = ({ value, onChange, disabledFuture }) => {
 
   const [yearBase, setYearBase] = React.useState(currentYear);
   React.useEffect(() => {
-    if (open) setYearBase(Math.max(currentYear, value.year - (value.year % 12)));
-  }, [open, value.year, currentYear]);
+    if (open) setYearBase(value.year - (value.year % 12));
+  }, [open, value.year]);
 
   const handleYearSelect = (year) => {
     setSelectedYear(year);
@@ -43,9 +43,8 @@ const MonthYearPicker = ({ value, onChange, disabledFuture }) => {
   };
 
   const visibleYears = React.useMemo(() => {
-    return Array.from({ length: 12 }, (_, i) => yearBase + i)
-      .filter(y => y >= currentYear && y <= currentYear + 10);
-  }, [yearBase, currentYear]);
+    return Array.from({ length: 12 }, (_, i) => yearBase + i);
+  }, [yearBase]);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -66,8 +65,7 @@ const MonthYearPicker = ({ value, onChange, disabledFuture }) => {
                 variant="ghost"
                 size="sm"
                 className="px-2"
-                onClick={() => setYearBase(y => Math.max(currentYear, y - 12))}
-                disabled={visibleYears[0] <= currentYear}
+                onClick={() => setYearBase(y => y - 12)}
               >
                 <ChevronLeft className="w-4 h-4" />
               </Button>
@@ -76,10 +74,7 @@ const MonthYearPicker = ({ value, onChange, disabledFuture }) => {
                 variant="ghost"
                 size="sm"
                 className="px-2"
-                onClick={() =>
-                  setYearBase(y => Math.min(currentYear + 10, y + 12))
-                }
-                disabled={visibleYears[visibleYears.length - 1] >= currentYear + 10}
+                onClick={() => setYearBase(y => y + 12)}
               >
                 <ChevronRight className="w-4 h-4" />
               </Button>
@@ -91,7 +86,6 @@ const MonthYearPicker = ({ value, onChange, disabledFuture }) => {
                   variant={y === value.year ? "default" : "outline"}
                   size="sm"
                   onClick={() => handleYearSelect(y)}
-                  disabled={y < currentYear}
                 >
                   {y}
                 </Button>
@@ -115,19 +109,9 @@ const MonthYearPicker = ({ value, onChange, disabledFuture }) => {
             <div className="grid grid-cols-3 gap-2">
               {months.map((m, idx) => {
                 let disabled = false;
-                if (selectedYear === currentYear && idx < currentMonth) {
-                  disabled = true;
-                }
-                if (selectedYear < currentYear) {
-                  disabled = true;
-                }
                 if (disabledFuture) {
-                  if (selectedYear === currentYear && idx > currentMonth) {
-                    disabled = true;
-                  }
-                  if (selectedYear > currentYear) {
-                    disabled = true;
-                  }
+                  if (selectedYear > currentYear) disabled = true;
+                  if (selectedYear === currentYear && idx > currentMonth) disabled = true;
                 }
                 return (
                   <Button
@@ -148,6 +132,6 @@ const MonthYearPicker = ({ value, onChange, disabledFuture }) => {
       </PopoverContent>
     </Popover>
   );
-};
+}
 
 export default MonthYearPicker;

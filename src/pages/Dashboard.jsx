@@ -10,9 +10,13 @@ import { Button } from '@/components/ui/button';
 import { CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { useDateStore } from '@/store/dateStore';
 
 const Dashboard = () => {
-  const [selectedDate, setSelectedDate] = useState(new Date());
+  const dateFromStore = useDateStore((s) => s.selectedDate?.from);
+  const setGlobalSelectedDate = useDateStore((s) => s.setSelectedDate);
+  const selectedDate = dateFromStore || new Date();
+
   const [selectedSegment, setSelectedSegment] = useState('all-segments');
   const [kpiTimeTab, setKpiTimeTab] = useState('daily');
   const [kpiVarianceTab, setKpiVarianceTab] = useState('last-year');
@@ -20,14 +24,14 @@ const Dashboard = () => {
 
   const [segments, setSegments] = useState([
     { value: 'all-segments', label: 'All Segments', properties: [] },
-    { value: 'visions-east', label: 'Visions Hotels East', properties: [] },
-    { value: 'visions-west', label: 'Visions Hotels West', properties: [] },
-    { value: 'greater-rochester', label: 'Greater Rochester', properties: [] },
-    { value: 'buffalo', label: 'Buffalo', properties: [] },
-    { value: 'all-best-western', label: 'All Best Western', properties: [] },
-    { value: 'all-hilton', label: 'All Hilton', properties: [] },
-    { value: 'all-ihg', label: 'All IHG', properties: [] },
-    { value: 'all-marriott', label: 'All Marriott', properties: [] }
+    // { value: 'visions-east', label: 'Visions Hotels East', properties: [] },
+    // { value: 'visions-west', label: 'Visions Hotels West', properties: [] },
+    // { value: 'greater-rochester', label: 'Greater Rochester', properties: [] },
+    // { value: 'buffalo', label: 'Buffalo', properties: [] },
+    // { value: 'all-best-western', label: 'All Best Western', properties: [] },
+    // { value: 'all-hilton', label: 'All Hilton', properties: [] },
+    // { value: 'all-ihg', label: 'All IHG', properties: [] },
+    // { value: 'all-marriott', label: 'All Marriott', properties: [] }
   ]);
 
   const handleSegmentUpdate = (updatedSegments) => {
@@ -36,7 +40,7 @@ const Dashboard = () => {
 
   const handleDateSelect = (date) => {
     if (date) {
-      setSelectedDate(date);
+      setGlobalSelectedDate({ from: date, to: undefined });
       setCalendarOpen(false);
     }
   };
@@ -85,7 +89,6 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* KPI Cards Section with Header and Tabs */}
       <KPICardsSection
         kpiTimeTab={kpiTimeTab}
         setKpiTimeTab={setKpiTimeTab}
@@ -96,13 +99,8 @@ const Dashboard = () => {
         segments={segments}
       />
 
-      {/* Business Performance Summary */}
-      <BusinessPerformanceSummary />
-
-      {/* Variance Table Section */}
-      <VarianceTable />
-
-      {/* Revenue KPI Section */}
+      {/* <BusinessPerformanceSummary /> */}
+      {/* <VarianceTable /> */}
       <RevenueKPI />
     </div>
   );

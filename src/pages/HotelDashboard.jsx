@@ -8,12 +8,14 @@ import PROPERTIES, { getPropertyWithRooms } from "@/constants/properties";
 import HotelKPICardsSection from "@/components/hotel/HotelKPICardsSection";
 import Next30Days from "@/components/hotel/Next30Days";
 import RevenueComparison from "@/components/RevenueComparison";
+import { useDateStore } from "@/store/dateStore";
 
 // New: Formatted date label (e.g., June 15th, 2025)
 const getFormattedDate = (date) => format(date, "MMMM do, yyyy");
 
-const HotelDashboardHeader = ({ hotelName, date, setDate }) => {
+function HotelDashboardHeader({ hotelName, date, setDate }) {
   const today = new Date();
+  const [open, setOpen] = useState(false);
 
   return (
     <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
@@ -29,7 +31,7 @@ const HotelDashboardHeader = ({ hotelName, date, setDate }) => {
         </div>
       </div>
       <div>
-        <Popover>
+        <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>
             <Button
               variant="outline"
@@ -44,7 +46,12 @@ const HotelDashboardHeader = ({ hotelName, date, setDate }) => {
             <Calendar
               mode="single"
               selected={date}
-              onSelect={(selected) => selected && setDate(selected)}
+              onSelect={(selected) => {
+                if (selected) {
+                  setDate(selected);
+                  setOpen(false);
+                }
+              }}
               initialFocus
               disabled={(d) => d > today}
               className="p-3 pointer-events-auto"
@@ -54,20 +61,25 @@ const HotelDashboardHeader = ({ hotelName, date, setDate }) => {
       </div>
     </div>
   );
-};
+}
 
 const HotelDashboard = ({ selectedHotel }) => {
-  const [date, setDate] = useState(new Date());
+  const dateFromStore = useDateStore((s) => s.selectedDate?.from);
+  const setSelectedDate = useDateStore((s) => s.setSelectedDate);
+  const date = dateFromStore || new Date();
+  const setDate = React.useCallback(
+    (d) => setSelectedDate(d ? { from: d, to: undefined } : null),
+    [setSelectedDate]
+  );
+
   const [kpiTimeTab, setKpiTimeTab] = useState("daily");
   const [kpiVarianceTab, setKpiVarianceTab] = useState("last-year");
 
-  // Get hotel name - fallback to first property if missing
   const hotelName = selectedHotel || PROPERTIES[0];
 
   return (
     <div>
       <HotelDashboardHeader hotelName={hotelName} date={date} setDate={setDate} />
-
       <div className="mt-2">
         <HotelKPICardsSection
           kpiTimeTab={kpiTimeTab}
@@ -76,7 +88,7 @@ const HotelDashboard = ({ selectedHotel }) => {
           setKpiVarianceTab={setKpiVarianceTab}
           selectedDate={date}
         />
-        <Next30Days />
+        {/* <Next30Days /> */}
         <RevenueComparison />
       </div>
     </div>
