@@ -100,7 +100,7 @@ const Dashboard = () => {
       />
 
       {/* <BusinessPerformanceSummary /> */}
-      {/* <VarianceTable /> */}
+      <VarianceTable />
       <RevenueKPI />
     </div>
   );

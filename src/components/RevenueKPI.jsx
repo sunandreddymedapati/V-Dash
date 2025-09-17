@@ -121,7 +121,7 @@ const RevenueKPI = () => {
     <Card className="w-full">
       <CardHeader>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <CardTitle>Revenue KPIs</CardTitle>
+          <CardTitle>Business Revenue KPIs</CardTitle>
           <div className="flex items-center space-x-2">
             <Button variant="outline" size="sm" onClick={onDownload} disabled={loading || !hasApiDataForKPI}>
               <Download className="w-4 h-4" />
