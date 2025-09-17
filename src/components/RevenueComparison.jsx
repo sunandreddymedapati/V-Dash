@@ -1,84 +1,144 @@
-import React from 'react';
+// Top-level imports
+import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from 'recharts';
+import { api } from '@/store/api';
+import GraphSkeleton from '@/components/ui/GraphSkeleton';
+import { usePropertyStore } from '@/store/propertyStore';
+import { getPropertyIdByName } from '@/utils/propertyUtils';
 
-// Demo revenue data for three years
-const demoRevenueData = [
-  { month: 'Jan', 2025: 42500, 2024: 41500, 2023: 40000 },
-  { month: 'Feb', 2025: 44200, 2024: 43000, 2023: 42000 },
-  { month: 'Mar', 2025: 46800, 2024: 44950, 2023: 43200 },
-  { month: 'Apr', 2025: 47700, 2024: 46000, 2023: 44500 },
-  { month: 'May', 2025: 48860, 2024: 47000, 2023: 44900 },
-  { month: 'Jun', 2025: 49400, 2024: 47500, 2023: 45200 },
-  { month: 'Jul', 2025: 51000, 2024: 49000, 2023: 46500 },
-  { month: 'Aug', 2025: 52200, 2024: 50000, 2023: 47700 },
-  { month: 'Sep', 2025: 48550, 2024: 48300, 2023: 45500 },
-  { month: 'Oct', 2025: 48900, 2024: 48500, 2023: 46000 },
-  { month: 'Nov', 2025: 47300, 2024: 47000, 2023: 44500 },
-  { month: 'Dec', 2025: 50300, 2024: 49500, 2023: 47000 },
-];
 
 // Color config for the chart
-const chartConfig = {
-  2025: {
-    label: "2025",
-    color: "#2563eb", // blue
-  },
-  2024: {
-    label: "2024", 
-    color: "#7c3aed", // purple
-  },
-  2023: {
-    label: "2023",
-    color: "#dc2626", // red
-  },
-};
+// Replace hardcoded years with a reusable palette.
+// We'll generate chartConfig dynamically inside the component using this palette.
+const chartColors = ['#2563eb', '#7c3aed', '#dc2626', '#059669', '#d97706', '#0ea5e9', '#f97316', '#16a34a'];
 
-const legendOrder = ["2023", "2024", "2025"];
+
 
 function RevenueComparison() {
+  const [chartData, setChartData] = useState(null);
+
+  const selectedHotel = usePropertyStore((s) => s.selectedHotel);
+  const properties = usePropertyStore((s) => s.properties);
+  const propertyId = useMemo(
+    () => getPropertyIdByName(properties, selectedHotel),
+    [properties, selectedHotel]
+  );
+
+  // Derive the available year keys from API data (exclude 'month')
+  const yearKeys = useMemo(() => {
+    if (!Array.isArray(chartData) || chartData.length === 0) return [];
+    return Object.keys(chartData[0]).filter((k) => k !== 'month').sort();
+  }, [chartData]);
+
+  // Build chartConfig dynamically for ChartContainer so we can use var(--color-<year>) in Bars
+  const chartConfig = useMemo(() => {
+    const cfg = {};
+    yearKeys.forEach((year, idx) => {
+      cfg[year] = { label: String(year), color: chartColors[idx % chartColors.length] };
+    });
+    return cfg;
+  }, [yearKeys]);
+
+  useEffect(() => {
+    let active = true;
+    if (!propertyId) return () => { active = false; };
+
+    setChartData(null);
+    (async () => {
+      try {
+        const res = await api.get('reports/revenue/comparison', {
+          params: { property_id: propertyId, max_years: 3 },
+        });
+        const data = Array.isArray(res) ? res : (Array.isArray(res?.data) ? res.data : []);
+        if (active) setChartData(data);
+      } catch (e) {
+        console.error('Revenue comparison fetch failed:', e);
+        if (active) setChartData([]);
+      }
+    })();
+
+    return () => { active = false; };
+  }, [propertyId]);
+
+  // Add a custom tooltip formatter to ensure a clear gap between year and amount
+  const tooltipItemFormatter = useCallback((value, name, item, index, payload) => {
+    const indicatorColor = item?.color || payload?.fill;
+    return (
+      <div className="flex w-full items-center justify-between gap-4">
+        <div className="flex items-center gap-2">
+          <span
+            className="inline-block h-2.5 w-2.5 rounded-[2px]"
+            style={{ backgroundColor: indicatorColor, borderColor: indicatorColor }}
+          />
+          <span className="text-muted-foreground">{name}</span>
+        </div>
+        <span className="font-mono font-medium tabular-nums text-foreground">
+          {(value ?? 0).toLocaleString()}
+        </span>
+      </div>
+    );
+  }, []);
+
   return (
-    <Card className="rounded-xl shadow-sm dark:bg-gray-800 dark:border-gray-700">
+    <Card className="rounded-xl shadow-sm dark:bg-gray-800 dark:border-gray-700 mt-6">
       <CardHeader>
         <CardTitle className="dark:text-white">Revenue Comparison</CardTitle>
       </CardHeader>
       <CardContent>
-        {/* Static Legend */}
+        {/* Dynamic Legend based on available years */}
         <div className="flex gap-6 items-center mb-2 justify-center">
-          {legendOrder.map((year) => (
+          {yearKeys.map((year) => (
             <div key={year} className="flex items-center gap-2">
-              <span 
+              <span
                 className="inline-block w-3 h-3 rounded-full"
-                style={{ backgroundColor: chartConfig[year].color }}
+                style={{ backgroundColor: chartConfig[year]?.color }}
                 aria-label={`Color for ${year}`}
               />
-              <span className="text-sm font-medium" style={{ color: chartConfig[year].color }}>
+              <span className="text-sm font-medium" style={{ color: chartConfig[year]?.color }}>
                 {year}
               </span>
             </div>
           ))}
         </div>
-        <div className="w-full" style={{ height: '320px' }}>
-          <ChartContainer config={chartConfig} className="w-full h-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={demoRevenueData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" className="stroke-gray-200 dark:stroke-gray-600" />
-                <XAxis 
-                  dataKey="month" 
-                  className="fill-gray-600 dark:fill-gray-300 text-xs"
-                />
-                <YAxis className="fill-gray-600 dark:fill-gray-300 text-xs" />
-                <ChartTooltip 
-                  content={<ChartTooltipContent className="dark:bg-gray-800 dark:border-gray-600" />} 
-                />
-                <Bar dataKey="2023" fill="var(--color-2023)" radius={[2, 2, 0, 0]} />
-                <Bar dataKey="2024" fill="var(--color-2024)" radius={[2, 2, 0, 0]} />
-                <Bar dataKey="2025" fill="var(--color-2025)" radius={[2, 2, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </ChartContainer>
-        </div>
+
+        {chartData === null ? (
+          <GraphSkeleton />
+        ) : chartData.length === 0 ? (
+          <div className="p-6 text-center text-sm text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-900/40 border border-dashed border-gray-300 dark:border-gray-700/70 rounded-lg">
+            No data exists.
+          </div>
+        ) : (
+          <div className="w-full" style={{ height: '320px' }}>
+            <ChartContainer config={chartConfig} className="w-full h-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-gray-200 dark:stroke-gray-600" />
+                  <XAxis dataKey="month" className="fill-gray-600 dark:fill-gray-300 text-xs" />
+                  <YAxis className="fill-gray-600 dark:fill-gray-300 text-xs" />
+                  <ChartTooltip
+                    content={
+                      <ChartTooltipContent
+                        className="dark:bg-gray-800 dark:border-gray-600"
+                        formatter={tooltipItemFormatter}
+                      />
+                    }
+                  />
+                  {/* Automate bar rendering for all discovered years */}
+                  {yearKeys.map((year) => (
+                    <Bar
+                      key={year}
+                      dataKey={year}
+                      fill={`var(--color-${year})`}
+                      radius={[2, 2, 0, 0]}
+                    />
+                  ))}
+                </BarChart>
+              </ResponsiveContainer>
+            </ChartContainer>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

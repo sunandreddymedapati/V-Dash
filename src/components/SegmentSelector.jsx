@@ -57,6 +57,7 @@ const SegmentSelector = ({
               size="sm"
               className="h-10 w-10 p-0 flex-shrink-0"
               onClick={() => setDialogOpen(true)}
+              disabled={true} // Temp
             >
               <Plus className="h-4 w-4" />
             </Button>
