@@ -1,58 +1,56 @@
 import React from 'react';
 import { TrendingUp, TrendingDown } from 'lucide-react';
-import { calculateVariance, formatCurrency, formatPercentage, formatNumber } from '../utils/revenueForecastUtils';
+import { formatCurrency, formatPercentage, formatNumber } from '../utils/revenueForecastUtils';
 
 const VarianceCell = ({ 
-  actual, 
-  comparison, 
+  variance,        // pass API variance string or number
+  trend,           // "up" | "down" | "flat"
+  isPositive,      // boolean from API
   isCurrency = false, 
   isPercentage = false,
   isWholeNumber = false,
   invertColors = false
 }) => {
-  console.log('VarianceCell calculating variance:', { actual, comparison, isCurrency, isPercentage });
-  
-  try {
-    const { difference, percentChange } = calculateVariance(actual, comparison);
-    const isPositive = difference >= 0;
-    
-    const colorLogic = invertColors ? !isPositive : isPositive;
-    
-    const formatDifferenceValue = (value) => {
-      if (isCurrency) {
-        return formatCurrency(Math.abs(value));
-      } else if (isPercentage) {
-        return formatPercentage(Math.abs(value));
-      } else if (isWholeNumber) {
-        return Math.round(Math.abs(value)).toString();
-      } else {
-        return formatNumber(Math.abs(value));
-      }
-    };
-    
-    return (
-      <div className="flex items-center justify-center space-x-2">
-        <div className="text-center">
-          <div className={`flex items-center justify-center space-x-1 ${colorLogic ? 'text-green-600' : 'text-red-600'}`}>
-            {isPositive ? <TrendingUp className="w-2.5 h-2.5" /> : <TrendingDown className="w-2.5 h-2.5" />}
-            <span className="text-xs font-medium">
-              {formatDifferenceValue(difference)}
-            </span>
-          </div>
-          <div className={`text-xs ${colorLogic ? 'text-green-500' : 'text-red-500'}`}>
-            {percentChange >= 0 ? '+' : ''}{percentChange.toFixed(1)}%
-          </div>
+  if (variance == null || variance === 'No data') {
+    return <div className="text-xs text-gray-400">–</div>;
+  }
+
+  // normalize variance value (strip $ and % if present)
+  let rawValue = variance;
+  if (typeof rawValue === 'string') {
+    rawValue = rawValue.replace(/[^0-9.-]+/g, '');
+  }
+  const numericValue = parseFloat(rawValue);
+
+  // Decide color logic (invert if OoO/Comp Rooms)
+  const colorLogic = invertColors ? !isPositive : isPositive;
+
+  const formatValue = (val) => {
+    if (isCurrency) {
+      return formatCurrency(Math.abs(val));
+    } else if (isPercentage) {
+      return formatPercentage(Math.abs(val));
+    } else if (isWholeNumber) {
+      return Math.round(Math.abs(val)).toString();
+    } else {
+      return formatNumber(Math.abs(val));
+    }
+  };
+
+  return (
+    <div className="flex items-center justify-center space-x-2">
+      <div className="text-center">
+        <div className={`flex items-center justify-center space-x-1 ${colorLogic ? 'text-green-600' : 'text-red-600'}`}>
+          {trend === 'up' ? (
+            <TrendingUp className="w-2.5 h-2.5" />
+          ) : trend === 'down' ? (
+            <TrendingDown className="w-2.5 h-2.5" />
+          ) : null}
+          <span className="text-xs font-medium">{formatValue(numericValue)}</span>
         </div>
       </div>
-    );
-  } catch (error) {
-    console.error('Error in VarianceCell:', error);
-    return (
-      <div className="text-xs text-red-500">
-        Error calculating variance
-      </div>
-    );
-  }
+    </div>
+  );
 };
 
 export default VarianceCell;
