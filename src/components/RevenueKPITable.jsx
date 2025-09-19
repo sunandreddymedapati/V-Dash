@@ -5,7 +5,8 @@ import { usePropertyStore } from '@/store/propertyStore';
 const RevenueKPITable = ({
   properties,
   columns,
-  generateData
+  generateData,
+  selectedKPI, // NEW: to decide formatting
 }) => {
   const storeProperties = usePropertyStore((s) => s.properties);
 
@@ -19,6 +20,57 @@ const RevenueKPITable = ({
         : propertyName;
     },
     [storeProperties]
+  );
+
+  // Minimal formatting helpers (currency/percentage)
+  const toNumber = (v) => {
+    if (v === null || v === undefined || v === '') return null;
+    if (typeof v === 'number') return Number.isFinite(v) ? v : null;
+    const n = Number(String(v).replace(/[^0-9.-]+/g, ''));
+    return Number.isFinite(n) ? n : null;
+  };
+
+  const formatCurrency = (v) => {
+    const n = toNumber(v);
+    if (n === null) return '';
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(n);
+  };
+
+  const formatPercentage = (v) => {
+    let n = toNumber(v);
+    if (n === null) return '';
+    // If API sends 0-1, convert to %
+    if (n > 0 && n <= 1) n = n * 100;
+    return `${n.toFixed(2)}%`;
+  };
+
+  const KPI_FORMAT = {
+    total_revenue: 'currency',
+    room_revenue: 'currency',
+    other_revenue: 'currency',
+    revpar: 'currency',
+    adr: 'currency',
+    cash: 'currency',
+    bank_cards: 'currency',
+    tax: 'currency',
+    city_ledger: 'currency',
+    guest_ledger: 'currency',
+    occupancy: 'percentage',
+  };
+
+  const formatValue = React.useCallback(
+    (raw) => {
+      const kind = KPI_FORMAT[selectedKPI];
+      if (kind === 'currency') return formatCurrency(raw);
+      if (kind === 'percentage') return formatPercentage(raw);
+      return raw ?? '';
+    },
+    [selectedKPI]
   );
 
   return (
@@ -46,7 +98,7 @@ const RevenueKPITable = ({
                   </TableCell>
                   {columns.map((column) => (
                     <TableCell key={column.key} className="text-center">
-                      {generateData(property, column.key)}
+                      {formatValue(generateData(property, column.key))}
                     </TableCell>
                   ))}
                 </TableRow>

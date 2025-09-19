@@ -13,6 +13,7 @@ import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { api } from '@/store/api';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useDateStore } from '@/store/dateStore';
 
 const VarianceTable = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -28,14 +29,20 @@ const VarianceTable = () => {
   // API state
   const [apiData, setApiData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const dateFromStore = useDateStore((s) => s.selectedDate?.from);
 
   // Fetch KPI data from API
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
+
+        const dateParam = dateFromStore
+          ? format(dateFromStore, 'yyyy-MM-dd')
+          : format(new Date(), 'yyyy-MM-dd');
+
         const res = await api.get("reports/revenue-kpi/by-property", {
-          params: { date: "2025-08-31" },
+          params: { date: dateParam },
         });
         setApiData(res.data || []); // response is already JSON
       } catch (err) {
@@ -45,7 +52,7 @@ const VarianceTable = () => {
       }
     };
     fetchData();
-  }, []);
+  }, [dateFromStore]);
 
   // If switching away from custom, clear dates
   useEffect(() => {
