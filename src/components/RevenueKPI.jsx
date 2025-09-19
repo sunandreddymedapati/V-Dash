@@ -16,12 +16,14 @@ import {
 } from './revenueKPIUtils';
 import { api } from '@/store/api';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useDateStore } from '@/store/dateStore';
 
 const RevenueKPI = () => {
   const [selectedKPI, setSelectedKPI] = useState('total_revenue');
   const [selectedTimeframe, setSelectedTimeframe] = useState('last-15-days');
   const [chartMode, setChartMode] = useState('table');
-  const today = new Date();
+  const dateFromStore = useDateStore((s) => s.selectedDate?.from);
+  const today = dateFromStore || new Date();
   const [monthYear, setMonthYear] = useState({
     month: today.getMonth(),
     year: today.getFullYear(),
@@ -210,25 +212,42 @@ const RevenueKPI = () => {
                     }, {})
                   : null;
 
+                // Reorder: properties that have any value for selectedKPI come first, while keeping the rest of your logic unchanged
+                const hasDataForProperty = (name) => {
+                  const series = valueMap?.[name]?.[selectedKPI];
+                  if (!series) return false;
+                  return Object.values(series).some(v => v !== null && v !== undefined && v !== '');
+                };
+
+                const sortedProperties = valueMap
+                  ? (() => {
+                      const withData = [];
+                      const withoutData = [];
+                      properties.forEach((p) => (hasDataForProperty(p) ? withData.push(p) : withoutData.push(p)));
+                      return withData.concat(withoutData);
+                    })()
+                  : properties;
+
                 if (chartMode === 'table') {
                   return (
                     <RevenueKPITable
-                      properties={properties}
+                      properties={sortedProperties}
                       columns={effectiveColumns}
+                      selectedKPI={selectedKPI}
                       generateData={(property, colKey) => {
                         const v = valueMap?.[property]?.[selectedKPI]?.[colKey];
-                        return v ?? ''; // show blank instead of random default
+                        return v ?? '';
                       }}
                     />
                   );
                 } else {
                   return (
                     <RevenueKPILineChart
-                      properties={properties}
+                      properties={sortedProperties}
                       columns={effectiveColumns}
                       generateData={(property, colKey) => {
                         const v = valueMap?.[property]?.[selectedKPI]?.[colKey];
-                        return v ?? null; // charts will be empty if no values
+                        return v ?? null;
                       }}
                       selectedKPI={selectedKPI}
                     />
